@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 public enum Token_Class
 {
-    Quotes,
+    Quotes, Comment_Statement,
     Float, Repeat, Elseif, Is_Equal, Number, String, Return, Endl, And, Or,
     Else, End, If, Integer, Read, Then, Until, Write,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, Assagniment, LessThanOp,
     GreaterThanOp, NotEqualOp, PlusOp, MinusOp, MultiplyOp, DivideOp,
     Idenifier
 }
+
 namespace JASON_Compiler
 {
 
@@ -49,16 +51,20 @@ namespace JASON_Compiler
             //Operators.Add(".", Token_Class.Dot);
             Operators.Add("&&", Token_Class.And);
             Operators.Add("||", Token_Class.Or);
+
             Operators.Add("\"", Token_Class.Quotes);
             Operators.Add(";", Token_Class.Semicolon);
             Operators.Add(",", Token_Class.Comma);
             Operators.Add("(", Token_Class.LParanthesis);
             Operators.Add(")", Token_Class.RParanthesis);
+
             Operators.Add("=", Token_Class.Is_Equal);
             Operators.Add("<", Token_Class.LessThanOp);
             Operators.Add(">", Token_Class.GreaterThanOp);
             Operators.Add("<>", Token_Class.NotEqualOp);
+
             Operators.Add(":=", Token_Class.Assagniment);
+
             Operators.Add("+", Token_Class.PlusOp);
             Operators.Add("-", Token_Class.MinusOp);
             Operators.Add("*", Token_Class.MultiplyOp);
@@ -74,24 +80,98 @@ namespace JASON_Compiler
             {
                 int j = i;
                 char CurrentChar = SourceCode[i];
-                string CurrentLexeme = CurrentChar.ToString();
-
+                //string CurrentLexeme = CurrentChar.ToString();
+                string CurrentLexeme = "";
                 if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
                     continue;
 
                 if (CurrentChar >= 'A' && CurrentChar <= 'z') //if you read a character
                 {
+                    while ((CurrentChar >= 'A' && CurrentChar <= 'z') || (CurrentChar >= '0' && CurrentChar <= '9'))
+                    {
 
+                        CurrentLexeme += CurrentChar;
+
+                        j++;
+
+                        if (j >= SourceCode.Length)
+                            break;
+
+                        CurrentChar = SourceCode[j];
+
+                    }
+                    i = j - 1;
+                    FindTokenClass(CurrentLexeme);
                 }
 
                 else if (CurrentChar >= '0' && CurrentChar <= '9')
                 {
+                    while ((CurrentChar >= '0' && CurrentChar <= '9') || (CurrentChar == '.'))
+                    {
 
+                        CurrentLexeme += CurrentChar;
+
+                        j++;
+
+                        if (j >= SourceCode.Length)
+                            break;
+
+                        CurrentChar = SourceCode[j];
+
+                    }
+                    i = j - 1;
+                    FindTokenClass(CurrentLexeme);
                 }
-                else if (CurrentChar == '{') //will be changed to "/*" and take care that the comment is multiline
+                else if (CurrentChar == '/') //will be changed to "/*" and take care that the comment is multiline
                 {
+                    CurrentLexeme += CurrentChar;
+                    j++;
+                    if (j >= SourceCode.Length)
+                    {
+                        FindTokenClass(CurrentLexeme); // Operator '/'
+                    }
+                    else
+                    {
+                        CurrentChar = SourceCode[j];
 
+                        if (CurrentChar == '*')
+                        {
+                            // start reading the comment;
+                            CurrentLexeme += CurrentChar;
+
+                            bool prev_was_astrik = false;
+                            j++;
+                            bool reach_end = false;
+                            while (j < SourceCode.Length)
+                            {
+                                if (SourceCode[j] == '*')
+                                    prev_was_astrik = true;
+                                else if (SourceCode[j] == '/' && prev_was_astrik)
+                                {
+                                    // end of comment
+                                    reach_end = true;
+                                }
+                                else
+                                    prev_was_astrik = false;
+
+
+                                CurrentLexeme += SourceCode[j++];
+                                if (reach_end)
+                                {
+                                    break;
+                                }
+                            }
+                                    FindTokenClass(CurrentLexeme);
+                        }
+                        else
+                        {
+                            FindTokenClass(CurrentLexeme); // Operator '/'
+                            
+                        }
+                    }
+                    i = j - 1;
                 }
+           
                 else
                 {
 
@@ -106,16 +186,47 @@ namespace JASON_Compiler
             Token Tok = new Token();
             Tok.lex = Lex;
             //Is it a reserved word?
-
+            if (ReservedWords.ContainsKey(Lex.ToUpper()))
+            {
+                Tok.token_type = ReservedWords[Lex.ToUpper()];
+                Tokens.Add(Tok);
+            }
 
             //Is it an identifier?
-
+            else if (isIdentifier(Lex))
+            {
+                Tok.token_type = Token_Class.Idenifier;
+                Tokens.Add(Tok);
+            }
 
             //Is it a Constant?
+            else if (isConstant(Lex))
+            {
+                Tok.token_type = Token_Class.Number;
+                Tokens.Add(Tok);
+
+            }
 
             //Is it an operator?
+            else if (Operators.ContainsKey(Lex))
+            {
+                Tok.token_type = Operators[Lex];
+                Tokens.Add(Tok);
+            }
+
+            else if (isComment(Lex))
+            {
+                Tok.token_type = Token_Class.Comment_Statement;
+                Tokens.Add(Tok);
+
+            }
 
             //Is it an undefined?
+            else
+            {
+                Errors.Error_List.Add(Lex + "is worng");
+            }
+
         }
 
 
@@ -123,7 +234,13 @@ namespace JASON_Compiler
         bool isIdentifier(string lex)
         {
             bool isValid = true;
-            // Check if the lex is an identifier or not.
+            
+            var rgx = new Regex(@"^([a-zA-Z]([0-9a-zA-z])*)$", RegexOptions.Compiled);
+
+            if(!rgx.IsMatch(lex))
+            {
+                isValid = false;
+            }
 
             return isValid;
         }
@@ -132,6 +249,26 @@ namespace JASON_Compiler
             bool isValid = true;
             // Check if the lex is a constant (Number) or not.
 
+            var rgx = new Regex(@"^([0-9]+(\.[0-9]+)?)$", RegexOptions.Compiled);
+
+            if (!rgx.IsMatch(lex))
+            {
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        bool isComment(string lex)
+        {
+            bool isValid = true;
+
+            var rgx = new Regex(@"^(\/\*[^*]*\*+([^/*][^*]*\*+)*\/)$", RegexOptions.Compiled);
+
+            if (!rgx.IsMatch(lex))
+            {
+                isValid = false;
+            }
             return isValid;
         }
     }
