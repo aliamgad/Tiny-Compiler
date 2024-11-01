@@ -64,6 +64,11 @@ namespace JASON_Compiler
         {
 
         }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
         /*  void PrintLexemes()
 {
 for (int i = 0; i < JASON_Compiler.Lexemes.Count; i++)
