@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 public enum Token_Class
 {
-    Quotes, Comment_Statement,
+    Comment_Statement, L_Curly_Bracket, R_Curly_Bracket,
     Float, Repeat, Elseif, Is_Equal, Number, String, Return, Endl, And, Or,
     Else, End, If, Integer, Read, Then, Until, Write,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, Assagniment, LessThanOp,
@@ -48,15 +48,17 @@ namespace JASON_Compiler
             ReservedWords.Add("UNTIL", Token_Class.Until);
             ReservedWords.Add("WRITE", Token_Class.Write);
 
-            //Operators.Add(".", Token_Class.Dot);
+            Operators.Add(".", Token_Class.Dot);
             Operators.Add("&&", Token_Class.And);
             Operators.Add("||", Token_Class.Or);
 
-            Operators.Add("\"", Token_Class.Quotes);
             Operators.Add(";", Token_Class.Semicolon);
             Operators.Add(",", Token_Class.Comma);
             Operators.Add("(", Token_Class.LParanthesis);
             Operators.Add(")", Token_Class.RParanthesis);
+
+            Operators.Add("{", Token_Class.L_Curly_Bracket);
+            Operators.Add("}", Token_Class.R_Curly_Bracket);
 
             Operators.Add("=", Token_Class.Is_Equal);
             Operators.Add("<", Token_Class.LessThanOp);
@@ -69,9 +71,6 @@ namespace JASON_Compiler
             Operators.Add("-", Token_Class.MinusOp);
             Operators.Add("*", Token_Class.MultiplyOp);
             Operators.Add("/", Token_Class.DivideOp);
-
-
-
         }
 
         public void StartScanning(string SourceCode)
@@ -82,7 +81,7 @@ namespace JASON_Compiler
                 char CurrentChar = SourceCode[i];
                 //string CurrentLexeme = CurrentChar.ToString();
                 string CurrentLexeme = "";
-                if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
+                if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n' || CurrentChar == '\t')
                     continue;
 
                 if (CurrentChar >= 'A' && CurrentChar <= 'z') //if you read a character
@@ -161,20 +160,105 @@ namespace JASON_Compiler
                                     break;
                                 }
                             }
-                                    FindTokenClass(CurrentLexeme);
+                            FindTokenClass(CurrentLexeme);
                         }
                         else
                         {
                             FindTokenClass(CurrentLexeme); // Operator '/'
-                            
+
                         }
                     }
                     i = j - 1;
                 }
-           
+                else if (CurrentChar == '"')
+                {
+                    CurrentLexeme += CurrentChar;
+
+                    j++;
+
+                    if (j >= SourceCode.Length)
+                       FindTokenClass(CurrentLexeme);
+                    else 
+                    {
+                        CurrentChar = SourceCode[j];
+                        while (CurrentChar != '"')
+                        {
+                            CurrentLexeme += CurrentChar;
+
+                            j++;
+
+                            if (j >= SourceCode.Length)
+                                break;
+
+                            CurrentChar = SourceCode[j];
+                        }
+                        CurrentLexeme += CurrentChar;
+                        i = j;
+                        FindTokenClass(CurrentLexeme);
+                    }
+
+                    
+                }
                 else
                 {
-
+                    CurrentLexeme += CurrentChar;
+                    if (CurrentChar == '&')
+                    {
+                        j++;
+                        if (j >= SourceCode.Length)
+                            FindTokenClass(CurrentLexeme);
+                        else
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            FindTokenClass(CurrentLexeme);
+                        }
+                    }
+                    else if (CurrentChar == '|')
+                    {
+                        j++;
+                        if (j >= SourceCode.Length)
+                            FindTokenClass(CurrentLexeme);
+                        else
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            FindTokenClass(CurrentLexeme);
+                        }
+                    }
+                    else if (CurrentChar == ':')
+                    {
+                        j++;
+                        if (j >= SourceCode.Length)
+                            FindTokenClass(CurrentLexeme);
+                        else
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            FindTokenClass(CurrentLexeme);
+                        }
+                    }
+                    else if (CurrentChar == '<')
+                    {
+                        j++;
+                        if (j >= SourceCode.Length)
+                            FindTokenClass(CurrentLexeme);
+                        else
+                        {
+                            if (SourceCode[j] != '>')
+                            {
+                                FindTokenClass(CurrentLexeme);//oporator less than
+                            }
+                            else
+                            {
+                                CurrentLexeme += SourceCode[j];//oporator not equal
+                                FindTokenClass(CurrentLexeme);
+                            }
+                        }
+                    }
+                        
+                    else
+                    {
+                        FindTokenClass(CurrentLexeme);
+                    }
+                    i = j;
                 }
             }
 
@@ -217,6 +301,13 @@ namespace JASON_Compiler
             else if (isComment(Lex))
             {
                 Tok.token_type = Token_Class.Comment_Statement;
+                Tokens.Add(Tok);
+
+            }
+
+            else if (isString(Lex))
+            {
+                Tok.token_type = Token_Class.String;
                 Tokens.Add(Tok);
 
             }
@@ -264,6 +355,18 @@ namespace JASON_Compiler
             bool isValid = true;
 
             var rgx = new Regex(@"^(\/\*[^*]*\*+([^/*][^*]*\*+)*\/)$", RegexOptions.Compiled);
+
+            if (!rgx.IsMatch(lex))
+            {
+                isValid = false;
+            }
+            return isValid;
+        }
+        bool isString(string lex)
+        {
+            bool isValid = true;
+
+            var rgx = new Regex("^(\"[^\"]*\")$", RegexOptions.Compiled);//doesnt  work with {  "\""  }
 
             if (!rgx.IsMatch(lex))
             {
