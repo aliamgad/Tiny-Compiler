@@ -88,7 +88,7 @@ namespace JASON_Compiler
                 {
 
                 }
-                else if (CurrentChar == '{') //will be changed to "/*"
+                else if (CurrentChar == '{') //will be changed to "/*" and take care that the comment is multiline
                 {
 
                 }
