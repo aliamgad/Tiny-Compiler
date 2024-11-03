@@ -354,7 +354,7 @@ namespace JASON_Compiler
         {
             bool isValid = true;
 
-            var rgx = new Regex(@"^(\/\*[^*]*\*+([^/*][^*]*\*+)*\/)$", RegexOptions.Compiled);
+            var rgx = new Regex(@"^(\/\*(([^\*](\/)*)|((\*)*[^\/])|[^\*\/])*\*\/)$", RegexOptions.Compiled);
 
             if (!rgx.IsMatch(lex))
             {
