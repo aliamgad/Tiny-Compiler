@@ -48,7 +48,6 @@ namespace JASON_Compiler
             ReservedWords.Add("UNTIL", Token_Class.Until);
             ReservedWords.Add("WRITE", Token_Class.Write);
 
-            Operators.Add(".", Token_Class.Dot);
             Operators.Add("&&", Token_Class.And);
             Operators.Add("||", Token_Class.Or);
 
@@ -105,8 +104,9 @@ namespace JASON_Compiler
 
                 else if (CurrentChar >= '0' && CurrentChar <= '9')
                 {
-                    while ((CurrentChar >= '0' && CurrentChar <= '9') || (CurrentChar == '.'))
+                    while ((CurrentChar >= '0' && CurrentChar <= '9') || (CurrentChar == '.') || (CurrentChar >= 'A' && CurrentChar <= 'z'))
                     {
+                        
 
                         CurrentLexeme += CurrentChar;
 
@@ -117,6 +117,7 @@ namespace JASON_Compiler
 
                         CurrentChar = SourceCode[j];
 
+                        
                     }
                     i = j - 1;
                     FindTokenClass(CurrentLexeme);
@@ -354,7 +355,8 @@ namespace JASON_Compiler
         {
             bool isValid = true;
 
-            var rgx = new Regex(@"^(\/\*(([^\*](\/)*)|((\*)*[^\/])|[^\*\/])*\*\/)$", RegexOptions.Compiled);
+            var rgx = new Regex(@"^(\/\*((\*+[^(\/)\*])|[^\*])*\*+(\/))$", RegexOptions.Compiled);
+            //var rgx = new Regex(@"^(\/\*(([^\*](\/)*)|((\*)*[^\/])|[^\*\/])*\*\/)$", RegexOptions.Compiled);
 
             if (!rgx.IsMatch(lex))
             {
