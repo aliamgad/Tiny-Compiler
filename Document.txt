@@ -1,14 +1,16 @@
 PRODUCTION RULES
 
-Program -> Comment_Statement FuncMaker Comment_Statement MainFunc Comment_Statement | Comment_Statement MainFunc Comment_Statement 
+Program -> Comment_Statement ProgramHelp
 
-FuncMaker -> Function FuncMaker | ε
+ProgramHelp ->  MainFunc Comment_Statement | FuncMaker Comment_Statement MainFunc Comment_Statement 
+
+FuncMaker -> Function FuncMaker | ε 
 
 Function -> FuncDecl FuncBody
 
 FuncDecl -> Datatype identifier Parameters
 
-Parameters -> (ParamList) 
+Parameters -> (ParamList)
 
 ParamList -> Parameter ParamHelp | ε
 
@@ -34,23 +36,29 @@ Func_Call -> identifier ArgList
 
 ArgList → (Arguments)
 
-Arguments → identifier Arg | ε
+/////////Arguments → identifier Arg | ε
 
-Arg → , identifier Arg | ε
+////////Arg → , identifier Arg | ε
+
+Arguments → AgrHlper Arg | ε
+
+AgrHlper -> identifier | number | string_value
+
+Arg → , AgrHlper Arg | ε
 
 ////////Equation -> Equation Addop Equation | Preceeded
 
-Equation -> Preceeded Equation_helper
+Equation -> Preceeded Equation_Helper
 
-Equation_helper ->  Addop Equation Equation_helper | ε
+Equation_Helper ->  Addop Equation Equation_Helper | ε
 
 Addop -> + | -
 
 ////////Preceeded -> Preceeded Mulop Preceeded | Factor
 
-Preceeded-> Factor Preceeded_helper
+Preceeded-> Factor Preceeded_Helper
 
-Preceeded_helper -> Mulop Preceeded Preceeded_helper | ε
+Preceeded_Helper -> Mulop Preceeded Preceeded_Helper | ε
 
 Mulop -> * | /
 
@@ -62,7 +70,7 @@ MainFunc -> Datatype main () FuncBody
 
 Statements -> Statement Statements | ε
 
-Statement -> Comment_Statement | Assignment_Statement | Declaration_Statement | Write_Statement | Read_Statement | Return_Statement | If_Statement | Repeat_Statement | Function_Call 
+Statement -> Comment_Statement | Assignment_Statement | Declaration_Statement | Write_Statement | Read_Statement | If_Statement | Repeat_Statement | Func_Call 
 
 Comment_Statement -> comment | ε
 
@@ -70,9 +78,9 @@ Assignment_Statement -> identifier := Expression ;
 
 Declaration_Statement -> Datatype IdentifierDec Idenlist ;
 
-Idenlist → , IdentifierDec IdenList | ε
-
 IdentifierDec -> identifier Expr
+
+Idenlist → , IdentifierDec IdenList | ε
 
 Expr -> := Expression | ε 
 
@@ -96,9 +104,9 @@ Boolean_Operator -> &&  |  ||
 
 Repeat_Statement -> repeat Statements until Condition_Statement
 
-Write_Statement -> write Cout ;
+Write_Statement -> write Write_Rest ;
 
-Cout -> Expression | endl
+Write_Rest -> Expression | endl
 
 Read_Statement -> read identifier ;
 
