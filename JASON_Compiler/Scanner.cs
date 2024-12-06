@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 public enum Token_Class
 {
-    Comment_Statement, L_Curly_Bracket, R_Curly_Bracket,
+    Comment_Statement, L_Curly_Bracket, R_Curly_Bracket,String_Value,
     Float, Repeat, Elseif, Is_Equal, Number, String, Return, Endl, And, Or,
     Else, End, If, Integer, Read, Then, Until, Write,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, Assagniment, LessThanOp,
@@ -308,7 +308,7 @@ namespace JASON_Compiler
 
             else if (isString(Lex))
             {
-                Tok.token_type = Token_Class.String;
+                Tok.token_type = Token_Class.String_Value;
                 Tokens.Add(Tok);
 
             }

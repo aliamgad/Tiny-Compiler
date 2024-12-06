@@ -1,0 +1,111 @@
+PRODUCTION RULES
+
+Program -> Comment_Statement FuncMaker Comment_Statement MainFunc Comment_Statement | Comment_Statement MainFunc Comment_Statement 
+
+FuncMaker -> Function FuncMaker | ε
+
+Function -> FuncDecl FuncBody
+
+FuncDecl -> Datatype identifier Parameters
+
+Parameters -> (ParamList) 
+
+ParamList -> Parameter ParamHelp | ε
+
+ParamHelp -> , Parameter ParamHelp | ε
+
+Parameter -> Datatype identifier
+
+FuncBody -> { Statements Return_Statement }
+
+Return_Statement -> return Expression ;
+
+Expression -> String_state | Term | Equation  
+
+String_state -> "Chars" or string_value
+
+/////////Chars -> Char Chars | ε
+
+/////////Char -> a | b | c | ..
+
+Term -> Number or number | identifier | Func_Call
+
+Func_Call -> ArgList  
+
+ArgList → (Arguments)
+
+Arguments → identifier Arg | ε
+
+Arg → , identifier Arg | ε
+
+////////Equation -> Equation Addop Preceeded | Preceeded
+
+Equation -> Preceeded Equation_helper
+
+Equation_helper ->  Addop Preceeded Equation_helper | ε
+
+Addop -> + | -
+
+////////Preceeded -> Preceeded Mulop Factor | Factor
+
+Preceeded-> Factor Preceeded_helper
+
+Preceeded_helper -> Mulop Factor Preceeded_helper | ε
+
+Mulop -> * | /
+
+Factor -> ( Equation ) | number
+
+Datatype -> int | float | string
+
+MainFunc -> Datatype main () FuncBody
+
+Statements -> Statement Statements | ε
+
+Statement -> Comment_Statement | Assignment_Statement | Declaration_Statement | Write_Statement | Read_Statement | Return_Statement | If_Statement | Repeat_Statement | Function_Call <-**possibly useless 
+
+Comment_Statement -> comment | ε
+
+Assignment_Statement -> identifier := Expression ;
+
+Declaration_Statement -> Datatype IdentifierDec Idenlist ;
+
+Idenlist → , IdentifierDec IdenList | ε
+
+IdentifierDec -> identifier Expr
+
+Expr -> := Expression | ε 
+
+If_Statement -> if Condition_Statement then Statements Flase_Condition end
+
+Flase_Condition -> Else_If_Statments Flase_Condition |  Else_Statment | ε
+
+Else_If_Statments -> elseif Condition_Statement then Statements
+
+Else_Statment -> else Statements
+
+Condition_Statement -> Condition Condition_Help
+
+Condition_Help -> Boolean_Operator Condition Condition_Helper | ε 
+
+Condition-> identifier Condition_Operator Term 
+
+Condition_Operator -> < | > | = | <>
+
+Boolean_Operator -> &&  |  ||
+
+Repeat_Statement -> repeat Statements until Condition_Statement
+
+Write_Statement -> write Cout ;
+
+Cout -> Expression | endl
+
+Read_Statement -> read identifier ;
+
+
+
+TERMINALS
+
+
+
+
