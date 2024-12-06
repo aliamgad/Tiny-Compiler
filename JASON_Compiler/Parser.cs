@@ -34,14 +34,60 @@ namespace JASON_Compiler
         Node Program()
         {
             Node program = new Node("Program");
-            program.Children.Add(Header());
-            program.Children.Add(DeclSec());
-            program.Children.Add(Block());
-            program.Children.Add(match(Token_Class.Dot));
+            program.Children.Add(Comment_Statement());
+            if (TokenStream[InputPointer].token_type == Token_Class.Main) 
+            {
+                program.Children.Add(Main());
+            }
+            else 
+            {
+                program.Children.Add(FuncMaker());
+                program.Children.Add(Comment_Statement());
+                program.Children.Add(Main());
+
+            }
+            program.Children.Add(Comment_Statement());
             MessageBox.Show("Success");
             return program;
         }
-        
+
+        Node FuncMaker()
+        {
+            Node funcmaker = new Node("funcmaker");
+            
+            if (TokenStream.Count > InputPointer && TokenStream[InputPointer].token_type == Token_Class.Main)
+            {
+                funcmaker.Children.Add(Function());
+                funcmaker.Children.Add(FuncMaker());
+            }
+            return funcmaker;
+        }
+
+        Node Function()
+        {
+            Node function = new Node("function");
+
+            function.Children.Add(Function());
+            function.Children.Add(FuncMaker());
+
+            return function;
+        }
+
+        private Node Main()
+        {
+            throw new NotImplementedException();
+        }
+
+        Node Comment_Statement()
+        {
+            Node comment_statement = new Node("comment_statement");
+            if (TokenStream.Count > InputPointer && TokenStream[InputPointer].token_type == Token_Class.Comment_Statement)
+            {
+                comment_statement.Children.Add(match(Token_Class.Comment_Statement));
+            }
+            return comment_statement;
+        }
+
         Node Header()
         {
             Node header = new Node("Header");

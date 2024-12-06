@@ -30,7 +30,7 @@ String_state -> "Chars" or string_value
 
 Term -> Number or number | identifier | Func_Call
 
-Func_Call -> ArgList  
+Func_Call -> identifier ArgList  
 
 ArgList → (Arguments)
 
@@ -38,23 +38,23 @@ Arguments → identifier Arg | ε
 
 Arg → , identifier Arg | ε
 
-////////Equation -> Equation Addop Preceeded | Preceeded
+////////Equation -> Equation Addop Equation | Preceeded
 
 Equation -> Preceeded Equation_helper
 
-Equation_helper ->  Addop Preceeded Equation_helper | ε
+Equation_helper ->  Addop Equation Equation_helper | ε
 
 Addop -> + | -
 
-////////Preceeded -> Preceeded Mulop Factor | Factor
+////////Preceeded -> Preceeded Mulop Preceeded | Factor
 
 Preceeded-> Factor Preceeded_helper
 
-Preceeded_helper -> Mulop Factor Preceeded_helper | ε
+Preceeded_helper -> Mulop Preceeded Preceeded_helper | ε
 
 Mulop -> * | /
 
-Factor -> ( Equation ) | number
+Factor -> ( Equation ) | Term
 
 Datatype -> int | float | string
 
@@ -62,7 +62,7 @@ MainFunc -> Datatype main () FuncBody
 
 Statements -> Statement Statements | ε
 
-Statement -> Comment_Statement | Assignment_Statement | Declaration_Statement | Write_Statement | Read_Statement | Return_Statement | If_Statement | Repeat_Statement | Function_Call <-**possibly useless 
+Statement -> Comment_Statement | Assignment_Statement | Declaration_Statement | Write_Statement | Read_Statement | Return_Statement | If_Statement | Repeat_Statement | Function_Call 
 
 Comment_Statement -> comment | ε
 
@@ -84,9 +84,9 @@ Else_If_Statments -> elseif Condition_Statement then Statements
 
 Else_Statment -> else Statements
 
-Condition_Statement -> Condition Condition_Help
+Condition_Statement -> Condition Condition_Helper
 
-Condition_Help -> Boolean_Operator Condition Condition_Helper | ε 
+Condition_Helper -> Boolean_Operator Condition Condition_Helper | ε 
 
 Condition-> identifier Condition_Operator Term 
 
@@ -103,9 +103,10 @@ Cout -> Expression | endl
 Read_Statement -> read identifier ;
 
 
-
 TERMINALS
 
+int | float | string | read | write | repeat | until | if | elseif | else | then | return | endl | end | 
 
+{ | } | , | ; | := | ( | ) | + | - | * | / | < | > | = | <> | &&  |  || |
 
-
+number | string_value | comment | main | identifier

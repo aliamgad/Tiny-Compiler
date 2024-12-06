@@ -7,7 +7,8 @@ using System.Text.RegularExpressions;
 
 public enum Token_Class
 {
-    Comment_Statement, L_Curly_Bracket, R_Curly_Bracket,String_Value,
+    Comment_Statement, L_Curly_Bracket, R_Curly_Bracket,
+    String_Value,Main,
     Float, Repeat, Elseif, Is_Equal, Number, String, Return, Endl, And, Or,
     Else, End, If, Integer, Read, Then, Until, Write,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, Assagniment, LessThanOp,
@@ -47,6 +48,8 @@ namespace JASON_Compiler
             ReservedWords.Add("THEN", Token_Class.Then);
             ReservedWords.Add("UNTIL", Token_Class.Until);
             ReservedWords.Add("WRITE", Token_Class.Write);
+
+            ReservedWords.Add("MAIN", Token_Class.Main);
 
             Operators.Add("&&", Token_Class.And);
             Operators.Add("||", Token_Class.Or);
