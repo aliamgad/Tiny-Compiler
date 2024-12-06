@@ -106,7 +106,7 @@ namespace JASON_Compiler
                 {
                     while ((CurrentChar >= '0' && CurrentChar <= '9') || (CurrentChar == '.') || (CurrentChar >= 'A' && CurrentChar <= 'z'))
                     {
-                        
+
 
                         CurrentLexeme += CurrentChar;
 
@@ -117,7 +117,7 @@ namespace JASON_Compiler
 
                         CurrentChar = SourceCode[j];
 
-                        
+
                     }
                     i = j - 1;
                     FindTokenClass(CurrentLexeme);
@@ -178,8 +178,8 @@ namespace JASON_Compiler
                     j++;
 
                     if (j >= SourceCode.Length)
-                       FindTokenClass(CurrentLexeme);
-                    else 
+                        FindTokenClass(CurrentLexeme);
+                    else
                     {
                         CurrentChar = SourceCode[j];
                         while (CurrentChar != '"')
@@ -198,7 +198,7 @@ namespace JASON_Compiler
                         FindTokenClass(CurrentLexeme);
                     }
 
-                    
+
                 }
                 else
                 {
@@ -254,7 +254,7 @@ namespace JASON_Compiler
                             }
                         }
                     }
-                        
+
                     else
                     {
                         FindTokenClass(CurrentLexeme);
@@ -316,7 +316,7 @@ namespace JASON_Compiler
             //Is it an undefined?
             else
             {
-                Errors.Error_List.Add(Lex + "is worng");
+                Errors.Error_List.Add("Lexical Error: " + Lex + "\r\n");
             }
 
         }
@@ -326,10 +326,10 @@ namespace JASON_Compiler
         bool isIdentifier(string lex)
         {
             bool isValid = true;
-            
+
             var rgx = new Regex(@"^([a-zA-Z]([0-9a-zA-z])*)$", RegexOptions.Compiled);
 
-            if(!rgx.IsMatch(lex))
+            if (!rgx.IsMatch(lex))
             {
                 isValid = false;
             }
