@@ -11,7 +11,7 @@ namespace JASON_Compiler
     public class Node
     {
         public List<Node> Children = new List<Node>();
-        
+
         public string Name;
         public Node(string N)
         {
@@ -22,8 +22,8 @@ namespace JASON_Compiler
     {
         int InputPointer = 0;
         List<Token> TokenStream;
-        public  Node root;
-        
+        public Node root;
+
         public Node StartParsing(List<Token> TokenStream)
         {
             this.InputPointer = 0;
@@ -45,7 +45,7 @@ namespace JASON_Compiler
         Node ProgramHelp()
         {
             Node programhelp = new Node("ProgramHelp");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Integer && TokenStream[InputPointer+1].token_type == Token_Class.Main)
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Integer && TokenStream[InputPointer + 1].token_type == Token_Class.Main)
             {
                 programhelp.Children.Add(MainFunc());
             }
@@ -62,7 +62,7 @@ namespace JASON_Compiler
         Node FuncMaker()
         {
             Node funcmaker = new Node("FuncMaker");
-            
+
             if (TokenStream.Count > InputPointer && (TokenStream[InputPointer].token_type == Token_Class.Integer || TokenStream[InputPointer].token_type == Token_Class.Float || TokenStream[InputPointer].token_type == Token_Class.String)
                 && TokenStream[InputPointer + 1].token_type != Token_Class.Main)
             {
@@ -98,7 +98,7 @@ namespace JASON_Compiler
         {
             Node parameters = new Node("Parameters");
 
-            
+
             parameters.Children.Add(match(Token_Class.LParanthesis));
             parameters.Children.Add(ParamList());
             parameters.Children.Add(match(Token_Class.RParanthesis));
@@ -117,7 +117,7 @@ namespace JASON_Compiler
                 return paramlist;
             }
             return null;
-            
+
         }
         Node ParamHelp()
         {
@@ -166,103 +166,106 @@ namespace JASON_Compiler
 
             return return_statement;
         }
-        
-        //need Revison
+
         Node Expression()
         {
             Node expression = new Node("Expression");
 
-            if (TokenStream[InputPointer].token_type == Token_Class.Number || TokenStream[InputPointer].token_type == Token_Class.Idenifier)
+            if (TokenStream.Count > InputPointer)
             {
-                if(TokenStream[InputPointer+1].token_type == Token_Class.MultiplyOp || TokenStream[InputPointer + 1].token_type == Token_Class.PlusOp ||
-                TokenStream[InputPointer + 1].token_type == Token_Class.DivideOp || TokenStream[InputPointer + 1].token_type == Token_Class.MinusOp)
+                if (TokenStream[InputPointer].token_type == Token_Class.Number || TokenStream[InputPointer].token_type == Token_Class.Idenifier)
                 {
-                    expression.Children.Add(Equation());
+                    if (TokenStream[InputPointer + 1].token_type == Token_Class.MultiplyOp || TokenStream[InputPointer + 1].token_type == Token_Class.PlusOp ||
+                    TokenStream[InputPointer + 1].token_type == Token_Class.DivideOp || TokenStream[InputPointer + 1].token_type == Token_Class.MinusOp)
+                    {
+                        expression.Children.Add(Equation());
+                    }
+                    else
+                    {
+                        expression.Children.Add(Term());
+                    }
                 }
-                else 
+                else
                 {
-                    expression.Children.Add(Term());
+                    expression.Children.Add(match(Token_Class.String_Value));
                 }
-            }
-            else
-            {
-                expression.Children.Add(match(Token_Class.String_Value));
+
+                return expression;
             }
 
-            return expression;
+            return null;
+        }
+
+
+        Node Term()
+        {
+            Node term = new Node("Term");
+            if (TokenStream.Count > InputPointer)
+            {
+                if (TokenStream[InputPointer].token_type == Token_Class.Number)
+                {
+                    term.Children.Add(match(Token_Class.Number));
+                }
+                //omar
+                else if (TokenStream[InputPointer].token_type == Token_Class.Idenifier && TokenStream[InputPointer + 1].token_type == Token_Class.LParanthesis)
+                {
+                    term.Children.Add(Func_Call());
+                }
+                else if (TokenStream[InputPointer].token_type == Token_Class.Idenifier)
+                {
+                    term.Children.Add(match(Token_Class.Idenifier));
+                }
+
+
+                return term;
+            }
+            return null;
 
         }
-            
 
-            Node Term()
+        Node Func_Call()
+        {
+            Node func_call = new Node("Func_Call");
+
+            func_call.Children.Add(match(Token_Class.Idenifier));
+            func_call.Children.Add(ArgList());
+
+            return func_call;
+        }
+        Node ArgList()
+        {
+            Node arglist = new Node("ArgList");
+
+            arglist.Children.Add(match(Token_Class.LParanthesis));
+            arglist.Children.Add(Arguments());
+            arglist.Children.Add(match(Token_Class.RParanthesis));
+
+            return arglist;
+        }
+
+        Node Arguments()
+        {
+            Node arguments = new Node("Arguments");
+
+            if (TokenStream.Count > InputPointer && (TokenStream[InputPointer].token_type == Token_Class.Idenifier || TokenStream[InputPointer].token_type == Token_Class.Number
+            || TokenStream[InputPointer].token_type == Token_Class.String_Value)) // omar hal al String haga ziada ? 
             {
-                Node term = new Node("Term");
-                if (TokenStream.Count > InputPointer)
-                {
-                    if (TokenStream[InputPointer].token_type == Token_Class.Number)
-                    {
-                        term.Children.Add(match(Token_Class.Number));
-                    }
-                    //omar
-                    else if (TokenStream[InputPointer].token_type == Token_Class.Idenifier && TokenStream[InputPointer+1].token_type == Token_Class.LParanthesis)
-                    {
-                        term.Children.Add(Func_Call());
-                    }
-                    else if (TokenStream[InputPointer].token_type == Token_Class.Idenifier)
-                    {
-                        term.Children.Add(match(Token_Class.Idenifier));
-                    }
-                    
-
-                    return term;
-                }
-                return null;
-
+                arguments.Children.Add(ArgHleper());
+                arguments.Children.Add(Arg());
+                return arguments;
             }
-
-            Node Func_Call()
-            {
-                Node func_call = new Node("Func_Call");
-
-                func_call.Children.Add(match(Token_Class.Idenifier));
-                func_call.Children.Add(ArgList());
-
-                return func_call;
-            }
-            Node ArgList()
-            {
-                Node arglist = new Node("ArgList");
-
-                arglist.Children.Add(match(Token_Class.LParanthesis));
-                arglist.Children.Add(Arguments());
-                arglist.Children.Add(match(Token_Class.RParanthesis));
-
-                return arglist;
-            }
-
-            Node Arguments()
-            {
-                Node arguments = new Node("Arguments");
-                         
-                if (TokenStream.Count > InputPointer && (TokenStream[InputPointer].token_type == Token_Class.Idenifier || TokenStream[InputPointer].token_type == Token_Class.Number 
-                || TokenStream[InputPointer].token_type == Token_Class.String_Value)) // omar hal al String haga ziada ? 
-                {
-                    arguments.Children.Add(ArgHleper());
-                    arguments.Children.Add(Arg());
-                    return arguments;
-                }
-                return null;
-            }
+            return null;
+        }
 
         private Node ArgHleper()
         {
             Node arghleper = new Node("ArgHleper");
 
-            if (TokenStream[InputPointer].token_type == Token_Class.Idenifier )
+            if (TokenStream[InputPointer].token_type == Token_Class.Idenifier)
             {
                 arghleper.Children.Add(match(Token_Class.Idenifier));
             }
-            else if(TokenStream[InputPointer].token_type == Token_Class.Number)
+            else if (TokenStream[InputPointer].token_type == Token_Class.Number)
             {
                 arghleper.Children.Add(match(Token_Class.Number));
             }
@@ -274,123 +277,125 @@ namespace JASON_Compiler
         }
 
         Node Arg()
-            {
-                Node arg = new Node("Arg");
+        {
+            Node arg = new Node("Arg");
 
-                if (TokenStream.Count > InputPointer && TokenStream[InputPointer].token_type == Token_Class.Comma)
-                {
-                    arg.Children.Add(match(Token_Class.Comma));
-                    arg.Children.Add(match(Token_Class.Idenifier));
-                    arg.Children.Add(Arg());
-                    return arg;
-                }
-                return null;
+            if (TokenStream.Count > InputPointer && TokenStream[InputPointer].token_type == Token_Class.Comma)
+            {
+                arg.Children.Add(match(Token_Class.Comma));
+                arg.Children.Add(match(Token_Class.Idenifier));
+                arg.Children.Add(Arg());
+                return arg;
+            }
+            return null;
+        }
+
+        Node Equation()
+        {
+            Node equation = new Node("Equation");
+
+            equation.Children.Add(Preceeded());
+            equation.Children.Add(Equation_Helper());
+
+            return equation;
+        }
+
+        Node Equation_Helper()
+        {
+            Node equation_helper = new Node("Equation_Helper");
+
+            if (TokenStream.Count > InputPointer && (TokenStream[InputPointer].token_type == Token_Class.PlusOp || TokenStream[InputPointer].token_type == Token_Class.MinusOp))
+            {
+                equation_helper.Children.Add(Addop());
+                equation_helper.Children.Add(Equation());
+                equation_helper.Children.Add(Equation_Helper());
+                return equation_helper;
+            }
+            return null;
+        }
+
+        Node Addop()
+        {
+            Node addop = new Node("Addop");
+
+            if (TokenStream[InputPointer].token_type == Token_Class.PlusOp)
+            {
+                addop.Children.Add(match(Token_Class.PlusOp));
+            }
+            else
+            {
+                addop.Children.Add(match(Token_Class.MinusOp));
             }
 
-            Node Equation()
+            return addop;
+        }
+
+        Node Preceeded()
+        {
+            Node preceeded = new Node("Preceeded");
+
+            preceeded.Children.Add(Factor());
+            preceeded.Children.Add(Preceeded_Helper());
+
+            return preceeded;
+        }
+
+        Node Preceeded_Helper()
+        {
+            Node preceeded_helper = new Node("Preceeded_Helper");
+
+            if (TokenStream.Count > InputPointer && (TokenStream[InputPointer].token_type == Token_Class.MultiplyOp || TokenStream[InputPointer].token_type == Token_Class.DivideOp))
             {
-                Node equation = new Node("Equation");
+                preceeded_helper.Children.Add(Mulop());
+                preceeded_helper.Children.Add(Preceeded());
+                preceeded_helper.Children.Add(Preceeded_Helper());
+                return preceeded_helper;
+            }
+            return null;
+        }
 
-                equation.Children.Add(Preceeded());
-                equation.Children.Add(Equation_Helper());
+        Node Mulop()
+        {
+            Node mulop = new Node("Mulop");
 
-                return equation;
+            if (TokenStream[InputPointer].token_type == Token_Class.MultiplyOp)
+            {
+                mulop.Children.Add(match(Token_Class.MultiplyOp));
+            }
+            else
+            {
+                mulop.Children.Add(match(Token_Class.DivideOp));
             }
 
-            Node Equation_Helper()
-            {
-                Node equation_helper = new Node("Equation_Helper");
+            return mulop;
+        }
 
-                if (TokenStream.Count > InputPointer && (TokenStream[InputPointer].token_type == Token_Class.PlusOp || TokenStream[InputPointer].token_type == Token_Class.MinusOp))
-                {
-                    equation_helper.Children.Add(Addop());
-                    equation_helper.Children.Add(Equation());
-                    equation_helper.Children.Add(Equation_Helper());
-                    return equation_helper;
-                }
-                return null;
+        Node Factor()
+        {
+            Node factor = new Node("Factor");
+
+            if (TokenStream[InputPointer].token_type == Token_Class.LParanthesis)
+            {
+
+                factor.Children.Add(match(Token_Class.LParanthesis));
+                factor.Children.Add(Equation());
+                factor.Children.Add(match(Token_Class.RParanthesis));
+            }
+            else
+            {
+                factor.Children.Add(Term());
             }
 
-            Node Addop()
+            return factor;
+        }
+
+
+        Node Datatype()
+        {
+            Node datatype = new Node("Datatype");
+
+            if(TokenStream.Count > InputPointer)
             {
-                Node addop = new Node("Addop");
-
-                if (TokenStream[InputPointer].token_type == Token_Class.PlusOp)
-                {
-                    addop.Children.Add(match(Token_Class.PlusOp));
-                }
-                else
-                {
-                    addop.Children.Add(match(Token_Class.MinusOp));
-                }
-
-                return addop;
-            }
-
-            Node Preceeded()
-            {
-                Node preceeded = new Node("Preceeded");
-
-                preceeded.Children.Add(Factor());
-                preceeded.Children.Add(Preceeded_Helper());
-
-                return preceeded;
-            }
-
-            Node Preceeded_Helper()
-            {
-                Node preceeded_helper = new Node("Preceeded_Helper");
-
-                if (TokenStream.Count > InputPointer && (TokenStream[InputPointer].token_type == Token_Class.MultiplyOp || TokenStream[InputPointer].token_type == Token_Class.DivideOp))
-                {
-                    preceeded_helper.Children.Add(Mulop());
-                    preceeded_helper.Children.Add(Preceeded());
-                    preceeded_helper.Children.Add(Preceeded_Helper());
-                    return preceeded_helper;
-                }
-                return null;
-            }
-
-            Node Mulop()
-            {
-                Node mulop = new Node("Mulop");
-
-                if (TokenStream[InputPointer].token_type == Token_Class.MultiplyOp)
-                {
-                    mulop.Children.Add(match(Token_Class.MultiplyOp));
-                }
-                else
-                {
-                    mulop.Children.Add(match(Token_Class.DivideOp));
-                }
-
-                return mulop;
-            }
-
-            Node Factor()
-            {
-                Node factor = new Node("Factor");
-
-                if (TokenStream[InputPointer].token_type == Token_Class.LParanthesis)
-                {
-
-                    factor.Children.Add(match(Token_Class.LParanthesis));
-                    factor.Children.Add(Equation());
-                    factor.Children.Add(match(Token_Class.RParanthesis));
-                }
-                else
-                {
-                    factor.Children.Add(Term());
-                }
-
-                return factor;
-            }
-
-
-            Node Datatype()
-            {
-                Node datatype = new Node("Datatype");
-
                 if (TokenStream[InputPointer].token_type == Token_Class.Integer)
                 {
                     datatype.Children.Add(match(Token_Class.Integer));
@@ -406,79 +411,82 @@ namespace JASON_Compiler
 
                 return datatype;
             }
+            return null;
+            
+        }
 
-            Node MainFunc()
+        Node MainFunc()
+        {
+            Node mainfunc = new Node("MainFunc");
+            mainfunc.Children.Add(Datatype());
+            mainfunc.Children.Add(match(Token_Class.Main));
+            mainfunc.Children.Add(match(Token_Class.LParanthesis));
+            mainfunc.Children.Add(match(Token_Class.RParanthesis));
+            mainfunc.Children.Add(FuncBody());
+
+            return mainfunc;
+        }
+
+        Node Statements()
+        {
+            Node statements = new Node("Statements");
+            if (TokenStream.Count > InputPointer &&
+                (TokenStream[InputPointer].token_type == Token_Class.Comment_Statement || TokenStream[InputPointer].token_type == Token_Class.Idenifier ||
+                (TokenStream[InputPointer].token_type == Token_Class.Integer || TokenStream[InputPointer].token_type == Token_Class.Float || TokenStream[InputPointer].token_type == Token_Class.String)
+                || TokenStream[InputPointer].token_type == Token_Class.Write || TokenStream[InputPointer].token_type == Token_Class.Read
+                || TokenStream[InputPointer].token_type == Token_Class.If || TokenStream[InputPointer].token_type == Token_Class.Repeat))
             {
-                Node mainfunc = new Node("MainFunc");
-                mainfunc.Children.Add(Datatype());
-                mainfunc.Children.Add(match(Token_Class.Main));
-                mainfunc.Children.Add(match(Token_Class.LParanthesis));
-                mainfunc.Children.Add(match(Token_Class.RParanthesis));
-                mainfunc.Children.Add(FuncBody());
-
-                return mainfunc;
+                statements.Children.Add(Statement());
+                statements.Children.Add(Statements());
+                return statements;
             }
+            return null;
+        }
 
-            Node Statements()
+        Node Comment_Statement()
+        {
+            Node comment_statement = new Node("Comment_Statement");
+            if (TokenStream.Count > InputPointer && TokenStream[InputPointer].token_type == Token_Class.Comment_Statement)
             {
-                Node statements = new Node("Statements");
-                if (TokenStream.Count > InputPointer && 
-                    (TokenStream[InputPointer].token_type == Token_Class.Comment_Statement || TokenStream[InputPointer].token_type == Token_Class.Idenifier ||
-                    (TokenStream[InputPointer].token_type == Token_Class.Integer || TokenStream[InputPointer].token_type == Token_Class.Float || TokenStream[InputPointer].token_type == Token_Class.String)
-                    || TokenStream[InputPointer].token_type == Token_Class.Write || TokenStream[InputPointer].token_type == Token_Class.Read 
-                    || TokenStream[InputPointer].token_type == Token_Class.If || TokenStream[InputPointer].token_type == Token_Class.Repeat))
-                {
-                    statements.Children.Add(Statement());
-                    statements.Children.Add(Statements());
-                    return statements;
-                }
-                return null;
+                comment_statement.Children.Add(match(Token_Class.Comment_Statement));
+                return comment_statement;
             }
+            return null;
 
-            Node Comment_Statement()
+        }
+
+        Node Statement()
+        {
+            Node statement = new Node("Statement");
+
+            if (TokenStream[InputPointer].token_type == Token_Class.Idenifier)//for Assignment_Statement and Func_Call
             {
-                Node comment_statement = new Node("Comment_Statement");
-                if (TokenStream.Count > InputPointer && TokenStream[InputPointer].token_type == Token_Class.Comment_Statement)
+                if (TokenStream[InputPointer].token_type == Token_Class.LParanthesis)
                 {
-                    comment_statement.Children.Add(match(Token_Class.Comment_Statement));
-                    return comment_statement;
+                    statement.Children.Add(Func_Call());
                 }
-                return null;
+                else
+                {
+                    statement.Children.Add(Assignment_Statement());
+                }
 
             }
-
-            Node Statement()
+            else if (TokenStream[InputPointer].token_type == Token_Class.Comment_Statement)
             {
-                Node statement = new Node("Statement");
-
-                if (TokenStream[InputPointer].token_type == Token_Class.Idenifier)//for Assignment_Statement and Func_Call
-                {
-                    if (TokenStream[InputPointer].token_type == Token_Class.LParanthesis)
-                    {
-                        statement.Children.Add(Func_Call());
-                    }
-                    else
-                    {
-                        statement.Children.Add(Assignment_Statement());
-                    }
-
-                }
-                else if (TokenStream[InputPointer].token_type == Token_Class.Comment_Statement)
-                {
-                    statement.Children.Add(Comment_Statement());
-                }
-                else if (TokenStream[InputPointer].token_type == Token_Class.Integer || TokenStream[InputPointer].token_type == Token_Class.Float || TokenStream[InputPointer].token_type == Token_Class.String)
-                {
-                    statement.Children.Add(Declaration_Statement());
-                }
-                else if (TokenStream[InputPointer].token_type == Token_Class.Write)
-                {
-                    statement.Children.Add(Write_Statement());
-                }
-                else if (TokenStream[InputPointer].token_type == Token_Class.Read)
-                {
-                    statement.Children.Add(Read_Statement());
-                }
+                statement.Children.Add(Comment_Statement());
+            }
+            else if (TokenStream[InputPointer].token_type == Token_Class.Integer || TokenStream[InputPointer].token_type == Token_Class.Float || TokenStream[InputPointer].token_type == Token_Class.String)
+            {
+                statement.Children.Add(Declaration_Statement());
+            }
+            else if (TokenStream[InputPointer].token_type == Token_Class.Write)
+            {
+                statement.Children.Add(Write_Statement());
+            }
+            else if (TokenStream[InputPointer].token_type == Token_Class.Read)
+            {
+                statement.Children.Add(Read_Statement());
+            }
             else if (TokenStream[InputPointer].token_type == Token_Class.If)
             {
                 statement.Children.Add(If_Statement());
@@ -563,15 +571,15 @@ namespace JASON_Compiler
         Node Flase_Condition()
         {
             Node flase_condition = new Node("Flase_Condition");
-            if (TokenStream.Count > InputPointer )
+            if (TokenStream.Count > InputPointer)
             {
-                if(TokenStream[InputPointer].token_type == Token_Class.Elseif)
+                if (TokenStream[InputPointer].token_type == Token_Class.Elseif)
                 {
                     flase_condition.Children.Add(Else_If_Statments());
                     flase_condition.Children.Add(Flase_Condition());
                     return flase_condition;
                 }
-                else if(TokenStream[InputPointer].token_type == Token_Class.Else)
+                else if (TokenStream[InputPointer].token_type == Token_Class.Else)
                 {
                     flase_condition.Children.Add(Else_Statment());
                     return flase_condition;
@@ -637,24 +645,28 @@ namespace JASON_Compiler
         Node Condition_Operator()
         {
             Node condition_operator = new Node("Condition_Operator");
-
-            if (TokenStream[InputPointer].token_type == Token_Class.LessThanOp)
+            if (TokenStream.Count > InputPointer)
             {
-                condition_operator.Children.Add(match(Token_Class.LessThanOp));
-            }
-            else if (TokenStream[InputPointer].token_type == Token_Class.GreaterThanOp)
-            {
-                condition_operator.Children.Add(match(Token_Class.GreaterThanOp));
-            }
-            else if (TokenStream[InputPointer].token_type == Token_Class.Is_Equal)
-            {
-                condition_operator.Children.Add(match(Token_Class.Is_Equal));
-            }
-            else
-            {
-                condition_operator.Children.Add(match(Token_Class.NotEqualOp));
-            }
+                if (TokenStream[InputPointer].token_type == Token_Class.LessThanOp)
+                {
+                    condition_operator.Children.Add(match(Token_Class.LessThanOp));
+                }
+                else if (TokenStream[InputPointer].token_type == Token_Class.GreaterThanOp)
+                {
+                    condition_operator.Children.Add(match(Token_Class.GreaterThanOp));
+                }
+                else if (TokenStream[InputPointer].token_type == Token_Class.Is_Equal)
+                {
+                    condition_operator.Children.Add(match(Token_Class.Is_Equal));
+                }
+                else
+                {
+                    condition_operator.Children.Add(match(Token_Class.NotEqualOp));
+                }
                 return condition_operator;
+            }
+            return null;
+            
         }
 
         Node Boolean_Operator()
@@ -745,7 +757,7 @@ namespace JASON_Compiler
             else
             {
                 Errors.Error_List.Add("Parsing Error: Expected "
-                        + ExpectedToken.ToString()  + "\r\n");
+                        + ExpectedToken.ToString() + "\r\n");
                 InputPointer++;
                 return null;
             }
