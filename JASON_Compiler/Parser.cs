@@ -206,7 +206,7 @@ namespace JASON_Compiler
                 {
                     term.Children.Add(match(Token_Class.Number));
                 }
-                //omar
+                
                 else if (TokenStream[InputPointer].token_type == Token_Class.Idenifier && TokenStream[InputPointer + 1].token_type == Token_Class.LParanthesis)
                 {
                     term.Children.Add(Func_Call());

@@ -226,6 +226,5 @@ AppPackages/
 # End of core ignore list, below put you custom 'per project' settings (patterns or path)
 #####
 =======
-*.docx
 *.pdf
 >>>>>>> 46a45bb (Initial Commit)
