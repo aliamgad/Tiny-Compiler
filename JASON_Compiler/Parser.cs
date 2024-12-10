@@ -211,7 +211,7 @@ namespace JASON_Compiler
                 {
                     term.Children.Add(Func_Call());
                 }
-                else if (TokenStream[InputPointer].token_type == Token_Class.Idenifier)
+                else
                 {
                     term.Children.Add(match(Token_Class.Idenifier));
                 }
