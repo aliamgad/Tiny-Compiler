@@ -38,7 +38,6 @@ namespace JASON_Compiler
             Node program = new Node("Program");
             program.Children.Add(Comment_Statement());
             program.Children.Add(ProgramHelp());
-            MessageBox.Show("Success");
             return program;
         }
 
@@ -449,6 +448,7 @@ namespace JASON_Compiler
             if (TokenStream.Count > InputPointer && TokenStream[InputPointer].token_type == Token_Class.Comment_Statement)
             {
                 comment_statement.Children.Add(match(Token_Class.Comment_Statement));
+                comment_statement.Children.Add(Comment_Statement());
                 return comment_statement;
             }
             return null;
